@@ -8,8 +8,11 @@
   },
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
-    "@google/genai": "^1.28.0",
-    "express": "^5.1.0"
-  }
+    "@google/genai": "^1.29.0",
+    "express": "^5.1.0",
+    "marked": "^17.0.0"
+  },
+  "keywords": []
 }

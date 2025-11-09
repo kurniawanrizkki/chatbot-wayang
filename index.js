@@ -1,4 +1,5 @@
 import express from 'express';
+import { marked } from 'marked';
 import { GoogleGenAI } from '@google/genai';
 
 const app = express();
@@ -80,6 +81,12 @@ const genAI = new GoogleGenAI({
     apiKey: GEMINI_API_KEY 
 });
 
+const welcomeMarkdown = `
+Selamat datang! Saya adalah dalang khusus yang hanya menguasai cerita **Prabu Cingkaradewa** dan **Sri-Sadana Makahyangan**.  
+Tanyakan detail tentang tokoh, peristiwa, atau silsilah dalam dua kisah ini saja. 🌟
+`;
+const htmlWelcome = marked(welcomeMarkdown);
+
 // HTML Template (Tidak diubah)
 const htmlTemplate = `
 <!DOCTYPE html>
@@ -138,6 +145,8 @@ const htmlTemplate = `
                         <option value="santai">Santai - Seperti ngobrol dengan teman</option>
                         <option value="formal">Formal - Bahasa yang sopan</option>
                         <option value="tradisional">Tradisional - Bahasa Jawa halus</option>
+                        <option value="gaul">Gaul - Bahasa Jakarta Selatan</option>
+
                     </select>
                 </div>
             </div>
@@ -179,7 +188,7 @@ const htmlTemplate = `
                         </div>
                     </div>
                     <div class="bg-amber-50 rounded-2xl rounded-tl-none p-4 max-w-[80%]">
-                        <p class="text-gray-800">Selamat datang! Saya adalah dalang khusus yang hanya menguasai cerita **Prabu Cingkaradewa** dan **Sri-Sadana Makahyangan**. Tanyakan detail tentang tokoh, peristiwa, atau silsilah dalam dua kisah ini saja. 🌟</p>
+                        <p class="text-gray-800"> ${htmlWelcome}</p>
                     </div>
                 </div>
             </div>
@@ -421,7 +430,12 @@ ${userProfile.languageStyle === 'santai' ?
     '- Gunakan bahasa santai dan akrab seperti ngobrol dengan teman\n- Boleh gunakan kata "kamu", "aku"\n- Sesekali gunakan emoji untuk ekspresif' : 
     userProfile.languageStyle === 'formal' ?
     '- Gunakan bahasa formal dan sopan\n- Gunakan kata "Anda", "saya"\n- Hindari kata-kata kasual' :
-    '- Gunakan bahasa Jawa halus yang sopan\n- Sisipkan kata-kata Jawa tradisional\n- Tunjukkan penghormatan budaya'}
+    userProfile.languageStyle === 'tradisional' ?
+    '- Gunakan bahasa Jawa halus yang sopan\n- Sisipkan kata-kata Jawa tradisional\n- Tunjukkan penghormatan budaya' :
+    '- Gunakan bahasa Indonesia yang gaul\n- Sisipkan kata-kata Indonesia gaul khas anak jakarta selatan\n- Hindari kata-kata formal'}
+
+
+
 
 ${userProfile.age && parseInt(userProfile.age) < 15 ?
     '- Gunakan bahasa yang mudah dipahami anak-anak\n- Buat cerita lebih menarik dengan deskripsi yang hidup\n- Fokus pada nilai moral yang mudah dicerna' : ''}
@@ -449,9 +463,12 @@ Selalu jawab dengan ramah, informatif, dan sesuai dengan profil pengguna di atas
     // 💥 FIX 3: Mengakses teks langsung dari objek 'result'
     const text = result.text; 
 
+    const htmlMessage = marked(text);
+
+
         res.json({ 
             success: true, 
-            message: text 
+            message: htmlMessage 
         });
 
     } catch (error) {
@@ -465,6 +482,7 @@ Selalu jawab dengan ramah, informatif, dan sesuai dengan profil pengguna di atas
 
 // Serve HTML
 app.get('/', (req, res) => {
+    // const markedhtmlTemplate = marked(htmlTemplate);
     res.send(htmlTemplate);
 });
 
